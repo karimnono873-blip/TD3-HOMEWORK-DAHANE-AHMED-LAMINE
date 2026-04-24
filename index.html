@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TD 3 SNL - Évaluation et Solution</title>
+    <style>
+        /* ==========================================================================
+           VARIABLES & DESIGN SYSTEM (Thème Google Pixel : Bleu, Cyan, Violet)
+           ========================================================================== */
+        :root {
+            /* Palette principale */
+            --google-blue: #4285F4;
+            --google-cyan: #00BCD4;
+            --google-violet: #8A2BE2;
+            --google-dark: #0d1117; /* GitHub Dark Mode Background */
+            --google-darker: #06090e;
+            --text-primary: #ffffff;
+            --text-secondary: #8b949e;
+            
+            /* Gradients et Effets */
+            --gradient-primary: linear-gradient(135deg, var(--google-blue), var(--google-violet));
+            --gradient-glow: radial-gradient(circle at center, rgba(0, 188, 212, 0.15) 0%, transparent 70%);
+            --glass-bg: rgba(22, 27, 34, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            
+            /* Typographie */
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-code: 'Courier New', Courier, monospace;
+            
+            /* Espacement et Layout */
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 32px;
+            --spacing-xl: 64px;
+            --border-radius: 12px;
+            --transition-speed: 0.3s;
+        }
+
+        /* ==========================================================================
+           RESET & GLOBAL STYLES
+           ========================================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--google-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Arrière-plan Canvas pour les particules (Thème Deep Space / Pixel) */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: radial-gradient(circle at center, var(--google-dark), var(--google-darker));
+        }
+
+        /* ==========================================================================
+           TYPOGRAPHY & UTILITIES
+           ========================================================================== */
+        h1, h2, h3, h4 {
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+        }
+
+        h1 {
+            font-size: 3rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            letter-spacing: -1px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--google-cyan);
+            border-bottom: 2px solid var(--glass-border);
+            padding-bottom: var(--spacing-sm);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: var(--google-blue);
+            margin-top: var(--spacing-lg);
+        }
+
+        p {
+            margin-bottom: var(--spacing-md);
+            color: #c9d1d9;
+        }
+
+        ul, ol {
+            margin-bottom: var(--spacing-md);
+            padding-left: var(--spacing-lg);
+            color: #c9d1d9;
+        }
+
+        li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .highlight {
+            color: var(--google-cyan);
+            font-weight: bold;
+        }
+
+        .violet-text {
+            color: var(--google-violet);
+        }
+
+        /* ==========================================================================
+           LAYOUT & CONTAINERS
+           ========================================================================== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-xl) var(--spacing-md);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Glassmorphism Cards */
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(66, 133, 244, 0.2);
+            border-color: rgba(0, 188, 212, 0.3);
+        }
+
+        /* ==========================================================================
+           NAVIGATION TABS
+           ========================================================================== */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--google-cyan);
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.4);
+        }
+
+        .tab-btn.active {
+            background: var(--gradient-primary);
+            border-color: transparent;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ==========================================================================
+           MATHEMATICS TYPOGRAPHY (HTML MOCKUP)
+           ========================================================================== */
+        .math-block {
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 4px solid var(--google-violet);
+            padding: var(--spacing-md);
+            margin: var(--spacing-md) 0;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            font-family: var(--font-code);
+            font-size: 1.1rem;
+            overflow-x: auto;
+        }
+
+        .math-inline {
+            font-family: var(--font-code);
+            color: var(--google-cyan);
+            background: rgba(0, 188, 212, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .equation {
+            text-align: center;
+            margin: var(--spacing-md) 0;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        .system-eq {
+            display: inline-block;
+            text-align: left;
+            border-left: 2px solid var(--google-blue);
+            padding-left: var(--spacing-md);
+        }
+
+        /* ==========================================================================
+           PAGE DE GARDE STYLES
+           ========================================================================== */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--google-violet);
+            filter: blur(150px);
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .badge {
+            background: rgba(66, 133, 244, 0.2);
+            color: var(--google-cyan);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: var(--spacing-md);
+            border: 1px solid rgba(0, 188, 212, 0.3);
+        }
+
+        .university-info {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .signature {
+            margin-top: var(--spacing-xl);
+            font-style: italic;
+            color: var(--google-cyan);
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        /* ==========================================================================
+           FOOTER
+           ========================================================================== */
+        footer {
+            text-align: center;
+            padding: var(--spacing-lg) 0;
+            border-top: 1px solid var(--glass-border);
+            margin-top: var(--spacing-xl);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        /* ==========================================================================
+           ANIMATIONS
+           ========================================================================== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="container">
+        <nav class="nav-tabs fade-in">
+            <button class="tab-btn active" onclick="openTab(event, 'page-garde')">Page de Garde</button>
+            <button class="tab-btn" onclick="openTab(event, 'objectif')">Objectif</button>
+            <button class="tab-btn" onclick="openTab(event, 'solution-q1')">Question 1</button>
+            <button class="tab-btn" onclick="openTab(event, 'solution-q2')">Question 2</button>
+            <button class="tab-btn" onclick="openTab(event, 'solution-q3')">Question 3</button>
+            <button class="tab-btn" onclick="openTab(event, 'conclusion')">Conclusion</button>
+        </nav>
+
+        <div id="page-garde" class="tab-content active card fade-in delay-1">
+            <div class="hero">
+                <span class="badge">Année Universitaire 2025-2026</span>
+                <h1>Systèmes Non Linéaires</h1>
+                <div class="university-info">
+                    <p><strong>U.S.T.H.B / F.G.E.</strong></p>
+                    <p>Département d'Automatique</p>
+                </div>
+                
+                <div style="margin: 40px 0; padding: 20px; border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border);">
+                    <h2 style="border: none; padding: 0; margin: 0; color: var(--text-primary);">TD N°3 - Exercice 1</h2>
+                    <p style="color: var(--google-cyan); margin-top: 10px; font-size: 1.2rem;">Stabilité d'un corps rigide en rotation (Satellite)</p>
+                </div>
+
+                <div style="text-align: left; width: 100%; max-width: 500px; margin: 0 auto; background: rgba(0,0,0,0.3); padding: 20px; border-radius: var(--border-radius);">
+                    <p><strong>Enseignant :</strong> Professeur Gherouat</p>
+                    <p><strong>Cahier des charges :</strong> Évaluation de la stabilité via les théorèmes de Lyapunov et linéarisation.</p>
+                </div>
+                
+                <p class="signature">created by DAHANE AHMED LAMINE</p>
+            </div>
+        </div>
+
+        <div id="objectif" class="tab-content card fade-in">
+            <h2>Objectif de l'exercice</h2>
+            <p>L'objectif de cet exercice est d'analyser la stabilité d'un système dynamique non linéaire modélisant la rotation d'un corps rigide (un satellite) dans l'espace, régit par les équations d'Euler.</p>
+            
+            <p>Les équations d'Euler sont définies par le système d'équations différentielles suivant :</p>
+            
+            <div class="math-block equation">
+                <div class="system-eq">
+                    J<sub>1</sub>(d&omega;<sub>1</sub>/dt) = (J<sub>2</sub> - J<sub>3</sub>)&omega;<sub>2</sub>&omega;<sub>3</sub> + u<sub>1</sub><br>
+                    J<sub>2</sub>(d&omega;<sub>2</sub>/dt) = (J<sub>3</sub> - J<sub>1</sub>)&omega;<sub>3</sub>&omega;<sub>1</sub> + u<sub>2</sub><br>
+                    J<sub>3</sub>(d&omega;<sub>3</sub>/dt) = (J<sub>1</sub> - J<sub>2</sub>)&omega;<sub>1</sub>&omega;<sub>2</sub> + u<sub>3</sub>
+                </div>
+            </div>
+
+            <p><strong>Où :</strong></p>
+            <ul>
+                <li><span class="math-inline">&omega;<sub>1</sub>, &omega;<sub>2</sub>, &omega;<sub>3</sub></span> : Composantes du vecteur de vitesse angulaire.</li>
+                <li><span class="math-inline">u<sub>1</sub>, u<sub>2</sub>, u<sub>3</sub></span> : Couples d'entrée (commandes).</li>
+                <li><span class="math-inline">J<sub>1</sub>, J<sub>2</sub>, J<sub>3</sub></span> : Moments d'inertie principaux (constantes strictement positives).</li>
+            </ul>
+
+            <p>Nous devrons utiliser la méthode de linéarisation (Jacobien) et l'approche directe de Lyapunov pour évaluer la stabilité autour de l'origine.</p>
+        </div>
+
+        <div id="solution-q1" class="tab-content card fade-in">
+            <h2>1. Linéarisation du système et discussion sur la stabilité</h2>
+            <p>On pose <span class="math-inline">u<sub>1</sub> = u<sub>2</sub> = u<sub>3</sub> = 0</span>. Le système autonome s'écrit :</p>
+            
+            <div class="math-block">
+                d&omega;<sub>1</sub>/dt = f<sub>1</sub>(&omega;) = [(J<sub>2</sub> - J<sub>3</sub>) / J<sub>1</sub>] * &omega;<sub>2</sub>&omega;<sub>3</sub><br>
+                d&omega;<sub>2</sub>/dt = f<sub>2</sub>(&omega;) = [(J<sub>3</sub> - J<sub>1</sub>) / J<sub>2</sub>] * &omega;<sub>3</sub>&omega;<sub>1</sub><br>
+                d&omega;<sub>3</sub>/dt = f<sub>3</sub>(&omega;) = [(J<sub>1</sub> - J<sub>2</sub>) / J<sub>3</sub>] * &omega;<sub>1</sub>&omega;<sub>2</sub>
+            </div>
+
+            <h3>Calcul de la matrice Jacobienne (A)</h3>
+            <p>Pour linéariser le système autour de l'origine d'équilibre <span class="math-inline">x<sub>e</sub> = (&omega;<sub>1</sub>, &omega;<sub>2</sub>, &omega;<sub>3</sub>) = (0,0,0)</span>, nous calculons la matrice Jacobienne :</p>
+            
+            <div class="math-block">
+                A = [&part;f<sub>i</sub> / &part;&omega;<sub>j</sub>] évaluée à &omega; = 0
+            </div>
+
+            <p>Calculons les dérivées partielles pour la première ligne (f<sub>1</sub>) :</p>
+            <ul>
+                <li>&part;f<sub>1</sub> / &part;&omega;<sub>1</sub> = 0</li>
+                <li>&part;f<sub>1</sub> / &part;&omega;<sub>2</sub> = [(J<sub>2</sub> - J<sub>3</sub>) / J<sub>1</sub>] * &omega;<sub>3</sub></li>
+                <li>&part;f<sub>1</sub> / &part;&omega;<sub>3</sub> = [(J<sub>2</sub> - J<sub>3</sub>) / J<sub>1</sub>] * &omega;<sub>2</sub></li>
+            </ul>
+
+            <p>Au point d'équilibre <span class="math-inline">(0,0,0)</span>, toutes les composantes &omega;<sub>i</sub> sont nulles. Ainsi, chaque dérivée partielle devient nulle. La matrice Jacobienne est une matrice nulle :</p>
+
+            <div class="math-block equation">
+                A = <br>
+                [ 0 , 0 , 0 ]<br>
+                [ 0 , 0 , 0 ]<br>
+                [ 0 , 0 , 0 ]
+            </div>
+
+            <h3>Discussion de la stabilité</h3>
+            <p>L'équation caractéristique de la matrice A est <span class="math-inline">det(&lambda;I - A) = &lambda;<sup>3</sup> = 0</span>. <br>
+            Les valeurs propres sont donc <strong>&lambda;<sub>1</sub> = &lambda;<sub>2</sub> = &lambda;<sub>3</sub> = 0</strong>.</p>
+            <p class="highlight">Conclusion critique :</p>
+            <p>Puisque les valeurs propres ont des parties réelles strictement égales à zéro (elles sont sur l'axe imaginaire), nous sommes dans un <strong>cas critique</strong> (cas douteux de la première méthode de Lyapunov). La linéarisation ne nous permet pas de conclure sur la stabilité du système non linéaire. Il est obligatoire de passer par la deuxième méthode de Lyapunov (fonction d'énergie).</p>
+        </div>
+
+        <div id="solution-q2" class="tab-content card fade-in">
+            <h2>2. Stabilité via une fonction de Lyapunov appropriée</h2>
+            <p>Pour démontrer la stabilité de l'origine pour <span class="math-inline">u = 0</span>, nous allons utiliser l'énergie cinétique de rotation du satellite comme fonction candidate de Lyapunov.</p>
+
+            <h3>Choix de la fonction de Lyapunov V(&omega;)</h3>
+            <div class="math-block equation">
+                V(&omega;) = (1/2) * [ J<sub>1</sub>&omega;<sub>1</sub><sup>2</sup> + J<sub>2</sub>&omega;<sub>2</sub><sup>2</sup> + J<sub>3</sub>&omega;<sub>3</sub><sup>2</sup> ]
+            </div>
+
+            <p>Vérifions les conditions :</p>
+            <ol>
+                <li><strong>V(0) = 0</strong> : Évident si &omega; = (0,0,0).</li>
+                <li><strong>V(&omega;) &gt; 0</strong> pour &omega; &ne; 0 : Vrai car les moments d'inertie J<sub>i</sub> sont des constantes strictement positives, constituant une forme quadratique définie positive.</li>
+            </ol>
+
+            <h3>Calcul de la dérivée dV/dt le long des trajectoires</h3>
+            <p>En dérivant V par rapport au temps, on obtient :</p>
+            <div class="math-block">
+                dV/dt = J<sub>1</sub>&omega;<sub>1</sub>(d&omega;<sub>1</sub>/dt) + J<sub>2</sub>&omega;<sub>2</sub>(d&omega;<sub>2</sub>/dt) + J<sub>3</sub>&omega;<sub>3</sub>(d&omega;<sub>3</sub>/dt)
+            </div>
+
+            <p>En remplaçant les d&omega;<sub>i</sub>/dt par les équations du système :</p>
+            <div class="math-block">
+                dV/dt = &omega;<sub>1</sub> [ (J<sub>2</sub> - J<sub>3</sub>)&omega;<sub>2</sub>&omega;<sub>3</sub> ] <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + &omega;<sub>2</sub> [ (J<sub>3</sub> - J<sub>1</sub>)&omega;<sub>3</sub>&omega;<sub>1</sub> ] <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + &omega;<sub>3</sub> [ (J<sub>1</sub> - J<sub>2</sub>)&omega;<sub>1</sub>&omega;<sub>2</sub> ]
+            </div>
+
+            <p>En factorisant par <span class="math-inline">&omega;<sub>1</sub>&omega;<sub>2</sub>&omega;<sub>3</sub></span> :</p>
+            <div class="math-block equation">
+                dV/dt = &omega;<sub>1</sub>&omega;<sub>2</sub>&omega;<sub>3</sub> [ (J<sub>2</sub> - J<sub>3</sub>) + (J<sub>3</sub> - J<sub>1</sub>) + (J<sub>1</sub> - J<sub>2</sub>) ]<br>
+                dV/dt = &omega;<sub>1</sub>&omega;<sub>2</sub>&omega;<sub>3</sub> [ 0 ] = 0
+            </div>
+
+            <h3>Conclusion sur la stabilité</h3>
+            <p>Puisque <span class="math-inline">dV/dt = 0 &le; 0</span> pour tout &omega;, la fonction V(&omega;) est non croissante. Selon le théorème de Lyapunov, l'origine est <strong>Stable au sens de Lyapunov</strong>.</p>
+            
+            <p class="violet-text"><strong>La stabilité est-elle asymptotique ?</strong></p>
+            <p><strong>Non.</strong> Pour qu'elle soit asymptotique, il faudrait que <span class="math-inline">dV/dt &lt; 0</span> pour &omega; &ne; 0 (définie négative). Ici, la dérivée est strictement nulle. Physiquement, cela signifie qu'en l'absence de couples d'entrée ou de frottements, l'énergie cinétique du satellite se conserve. Les trajectoires décrivent des orbites fermées (ellipsoïdes d'inertie) autour de l'origine sans jamais y converger.</p>
+        </div>
+
+        <div id="solution-q3" class="tab-content card fade-in">
+            <h2>3. Stabilité Asymptotique Globale avec commande par retour d'état</h2>
+            <p>Supposons maintenant que les couples d'entrée sont appliqués de manière proportionnelle à la vitesse : <span class="math-inline">u<sub>i</sub> = -k<sub>i</sub>&omega;<sub>i</sub></span> (avec k<sub>i</sub> &gt; 0, ce qui agit comme un frottement visqueux ou une loi de commande stabilisante).</p>
+
+            <h3>Nouveau système en boucle fermée</h3>
+            <div class="math-block">
+                J<sub>1</sub>(d&omega;<sub>1</sub>/dt) = (J<sub>2</sub> - J<sub>3</sub>)&omega;<sub>2</sub>&omega;<sub>3</sub> - k<sub>1</sub>&omega;<sub>1</sub><br>
+                J<sub>2</sub>(d&omega;<sub>2</sub>/dt) = (J<sub>3</sub> - J<sub>1</sub>)&omega;<sub>3</sub>&omega;<sub>1</sub> - k<sub>2</sub>&omega;<sub>2</sub><br>
+                J<sub>3</sub>(d&omega;<sub>3</sub>/dt) = (J<sub>1</sub> - J<sub>2</sub>)&omega;<sub>1</sub>&omega;<sub>2</sub> - k<sub>3</sub>&omega;<sub>3</sub>
+            </div>
+
+            <h3>Analyse avec la même fonction de Lyapunov</h3>
+            <p>Nous reprenons notre fonction candidate <span class="math-inline">V(&omega;) = (1/2) * [ J<sub>1</sub>&omega;<sub>1</sub><sup>2</sup> + J<sub>2</sub>&omega;<sub>2</sub><sup>2</sup> + J<sub>3</sub>&omega;<sub>3</sub><sup>2</sup> ]</span> (toujours définie positive).</p>
+            
+            <p>Calculons la nouvelle dérivée dV/dt :</p>
+            <div class="math-block">
+                dV/dt = &omega;<sub>1</sub> [ (J<sub>2</sub> - J<sub>3</sub>)&omega;<sub>2</sub>&omega;<sub>3</sub> - k<sub>1</sub>&omega;<sub>1</sub> ] <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + &omega;<sub>2</sub> [ (J<sub>3</sub> - J<sub>1</sub>)&omega;<sub>3</sub>&omega;<sub>1</sub> - k<sub>2</sub>&omega;<sub>2</sub> ] <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; + &omega;<sub>3</sub> [ (J<sub>1</sub> - J<sub>2</sub>)&omega;<sub>1</sub>&omega;<sub>2</sub> - k<sub>3</sub>&omega;<sub>3</sub> ]
+            </div>
+
+            <p>Nous savons d'après la question 2 que la partie liée aux termes croisés s'annule :</p>
+            <div class="math-block equation">
+                dV/dt = 0 - k<sub>1</sub>&omega;<sub>1</sub><sup>2</sup> - k<sub>2</sub>&omega;<sub>2</sub><sup>2</sup> - k<sub>3</sub>&omega;<sub>3</sub><sup>2</sup>
+            </div>
+
+            <h3>Conclusion sur la stabilité globale</h3>
+            <p>Étant donné que les constantes de retour d'état <span class="math-inline">k<sub>i</sub></span> sont strictement positives :</p>
+            <ul>
+                <li><span class="math-inline">dV/dt &lt; 0</span> pour tout <span class="math-inline">&omega; &ne; 0</span> (La dérivée est définie négative).</li>
+                <li>La fonction <span class="math-inline">V(&omega;)</span> est radialement non bornée, c'est-à-dire que <span class="math-inline">V(&omega;) &rarr; &infin;</span> lorsque <span class="math-inline">||&omega;|| &rarr; &infin;</span>.</li>
+            </ul>
+            <p class="highlight">D'après le théorème de Lyapunov, le système en boucle fermée est Globalement Asymptotiquement Stable (GAS).</p>
+            <p>Physiquement, la commande injecte une dissipation d'énergie dans le système. L'énergie cinétique va strictement diminuer jusqu'à ce que la vitesse de rotation du satellite s'annule complètement (&omega; = 0), quelle que soit sa condition initiale.</p>
+        </div>
+
+        <div id="conclusion" class="tab-content card fade-in">
+            <h2>Conclusion Générale</h2>
+            <p>L'étude des équations d'Euler du mouvement d'un satellite illustre parfaitement les limitations et la puissance des différents outils d'analyse des systèmes non linéaires :</p>
+            
+            <ol>
+                <li><strong>La linéarisation (Théorème de Poincaré-Lyapunov) :</strong> S'est avérée insuffisante pour conclure sur le système libre, nous plaçant dans un cas critique avec des pôles sur l'axe imaginaire.</li>
+                <li><strong>La méthode directe de Lyapunov :</strong> A permis de prouver de manière élégante que le système autonome est intrinsèquement stable (grâce à la conservation de l'énergie), sans pour autant converger vers le repos.</li>
+                <li><strong>La commande par retour d'état :</strong> L'ajout d'une commande proportionnelle modifie la dynamique de l'énergie, rendant le système globalement asymptotiquement stable. C'est le principe fondamental de la stabilisation des engins spatiaux.</li>
+            </ol>
+
+ 
+        </div>
+
+        <footer>
+            <p class="signature">created by DAHANE AHMED LAMINE</p>
+            <p style="font-size: 0.8rem; margin-top: 10px; color: var(--text-secondary);">Thème visuel : Google Pixel Deep Space</p>
+        </footer>
+    </div>
+
+    <script>
+        /**
+         * Fonction pour gérer la navigation par onglets
+         */
+        function openTab(evt, tabName) {
+            // Cacher tout le contenu des onglets
+            const tabcontent = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+
+            // Enlever la classe "active" de tous les boutons
+            const tablinks = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+
+            // Afficher l'onglet courant et ajouter la classe active au bouton ayant déclenché l'evt
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            
+            // Scroll doux vers le haut du conteneur lors d'un changement d'onglet
+            window.scrollTo({
+                top: document.querySelector('.nav-tabs').offsetTop - 20,
+                behavior: 'smooth'
+            });
+        }
+
+        /**
+         * Système de Particules "Deep Space / Pixel"
+         */
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [];
+        
+        // Configuration des couleurs Google Pixel
+        const colors = [
+            'rgba(66, 133, 244, 0.7)',  // Blue
+            'rgba(0, 188, 212, 0.7)',   // Cyan
+            'rgba(138, 43, 226, 0.7)',  // Violet
+            'rgba(255, 255, 255, 0.4)'  // White/Stars
+        ];
+
+        // Ajustement de la taille du canvas
+        function setCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', setCanvasSize);
+        setCanvasSize();
+
+        // Classe Particule
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5; // Taille variable
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.glow = Math.random() > 0.8; // 20% de particules qui brillent plus fort
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Réapparition sur les bords pour un effet continu
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                
+                if (this.glow) {
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = this.color;
+                } else {
+                    ctx.shadowBlur = 0;
+                }
+                
+                ctx.fill();
+            }
+        }
+
+        // Initialisation du tableau de particules
+        function initParticles() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.width * canvas.height) / 8000; // Densité ajustée
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        // Boucle d'animation
+        function animateParticles() {
+            // Trace avec un léger alpha pour un effet de traînée "espace profond"
+            ctx.fillStyle = 'rgba(13, 17, 23, 0.2)'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                
+                // Connexions dynamiques entre particules proches (Constellations)
+                for (let j = i; j < particlesArray.length; j++) {
+                    const dx = particlesArray[i].x - particlesArray[j].x;
+                    const dy = particlesArray[i].y - particlesArray[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        // Opacité dynamique basée sur la distance
+                        const opacity = 1 - (distance / 100);
+                        ctx.strokeStyle = `rgba(0, 188, 212, ${opacity * 0.15})`; // Lignes cyan légères
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        // Lancement
+        initParticles();
+        animateParticles();
+        
+        // Réinitialisation douce lors du redimensionnement
+        window.addEventListener('resize', () => {
+            initParticles();
+        });
+    </script>
+</body>
+</html>
